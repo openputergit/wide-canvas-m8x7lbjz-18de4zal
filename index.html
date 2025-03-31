@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuizPrep Pro - DSA Learning Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .dragover { border: 2px dashed #3b82f6 !important; background: #f0f9ff !important; }
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .dark { background-color: #1a1a1a; color: #ffffff; }
+        .dark .card, .dark .bg-white { background-color: #2d2d2d !important; }
+        .dark .border { border-color: #3d3d3d !important; }
+        .dark .border-gray-300 { border-color: #3d3d3d !important; }
+        .dark .text-gray-600 { color: #a0a0a0 !important; }
+        .dark .shadow, .dark .shadow-sm, .dark .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2) !important; }
+        .dark .hover\:bg-gray-100:hover { background-color: #3d3d3d !important; }
+        .dark input, .dark select, .dark textarea { 
+            background-color: #3d3d3d !important; 
+            color: #ffffff !important;
+            border-color: #4d4d4d !important;
+        }
+        .dark .bg-blue-50 { background-color: rgba(59, 130, 246, 0.15) !important; }
+        .dark .bg-green-50 { background-color: rgba(16, 185, 129, 0.15) !important; }
+        .dark .bg-yellow-50 { background-color: rgba(245, 158, 11, 0.15) !important; }
+        .question-card {
+            transition: all 0.3s ease;
+        }
+        .question-card:hover {
+            transform: translateY(-2px);
+        }
+        .timer {
+            font-family: 'Inter', monospace;
+        }
+        .option-hover:hover {
+            transform: translateX(5px);
+            transition: transform 0.2s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0">
+                    <h1 class="text-2xl font-bold text-blue-600">QuizPrep Pro</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button id="darkModeToggle" class="p-2 rounded-full hover:bg-gray-100">
+                        <i class="bi bi-moon-stars"></i>
+                    </button>
+                    <button id="profileBtn" onclick="showProfile()" class="p-2 rounded-full hover:bg-gray-100 hidden">
+                        <i class="bi bi-person-circle"></i>
+                    </button>
+                    <div id="userSection" class="hidden">
+                        <span id="userName" class="mr-4"></span>
+                        <button onclick="logout()" class="text-gray-600 hover:text-gray-900">Logout</button>
+                    </div>
+                    <div id="authButtons" class="flex gap-2">
+                        <button onclick="showLogin()" class="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-md">Login</button>
+                        <button onclick="showSignup()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Sign Up</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Home Section -->
+        <section id="homeSection" class="text-center py-12">
+            <h2 class="text-4xl font-bold mb-6">Analyze Question Papers & Practice DSA</h2>
+            <p class="text-gray-600 mb-8">Upload your question papers or start practicing DSA with our curated quizzes</p>
+            <div class="flex flex-wrap justify-center gap-6">
+                <button onclick="showUpload()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200 flex items-center">
+                    <i class="bi bi-upload mr-2"></i> Upload Question Paper
+                </button>
+                <button onclick="showDSADashboard()" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 flex items-center">
+                    <i class="bi bi-book mr-2"></i> Practice DSA
+                </button>
+            </div>
+            
+            <!-- Features Section -->
+            <div class="mt-16 grid md:grid-cols-3 gap-8">
+                <div class="p-6 bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+                    <div class="rounded-full bg-blue-100 w-12 h-12 flex items-center justify-center mx-auto mb-4">
+                        <i class="bi bi-file-earmark-text text-2xl text-blue-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Upload Papers</h3>
+                    <p class="text-gray-600">Upload and analyze past question papers to identify important topics</p>
+                </div>
+                <div class="p-6 bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+                    <div class="rounded-full bg-green-100 w-12 h-12 flex items-center justify-center mx-auto mb-4">
+                        <i class="bi bi-clipboard-check text-2xl text-green-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Practice Quizzes</h3>
+                    <p class="text-gray-600">Test your knowledge with our curated DSA quizzes</p>
+                </div>
+                <div class="p-6 bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+                    <div class="rounded-full bg-purple-100 w-12 h-12 flex items-center justify-center mx-auto mb-4">
+                        <i class="bi bi-graph-up text-2xl text-purple-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Track Progress</h3>
+                    <p class="text-gray-600">Monitor your performance and identify areas for improvement</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Auth Modals -->
+        <div id="authModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+            <div class="bg-white p-8 rounded-lg max-w-md w-full">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold" id="modalTitle">Login</h3>
+                    <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div id="loginForm" class="hidden">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-medium mb-2">Email</label>
+                        <input type="email" id="loginEmail" placeholder="Enter your email" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p id="loginEmailError" class="text-red-500 text-sm mt-1 hidden">Please enter a valid email</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-medium mb-2">Password</label>
+                        <input type="password" id="loginPassword" placeholder="Enter your password" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p id="loginPasswordError" class="text-red-500 text-sm mt-1 hidden">Password is required</p>
+                    </div>
+                    <div class="flex justify-between mb-6">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="rememberMe" class="mr-2">
+                            <label for="rememberMe" class="text-sm text-gray-600">Remember me</label>
+                        </div>
+                        <a href="#" class="text-sm text-blue-600 hover:text-blue-800">Forgot Password?</a>
+                    </div>
+                    <button onclick="login()" class="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700 transition duration-200 mb-4">Login</button>
+                    <button onclick="loginWithGoogle()" class="w-full border border-gray-300 p-3 rounded flex items-center justify-center gap-2 hover:bg-gray-50 transition duration-200">
+                        <i class="bi bi-google"></i> Continue with Google
+                    </button>
+                    <p class="text-center mt-4 text-gray-600">Don't have an account? <a href="#" onclick="toggleAuthForms()" class="text-blue-600 hover:text-blue-800">Sign up</a></p>
+                </div>
+                <div id="signupForm" class="hidden">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-medium mb-2">Name</label>
+                        <input type="text" id="signupName" placeholder="Enter your name" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p id="signupNameError" class="text-red-500 text-sm mt-1 hidden">Name is required</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-medium mb-2">Email</label>
+                        <input type="email" id="signupEmail" placeholder="Enter your email" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p id="signupEmailError" class="text-red-500 text-sm mt-1 hidden">Please enter a valid email</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-medium mb-2">Password</label>
+                        <input type="password" id="signupPassword" placeholder="Create a password" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p id="signupPasswordError" class="text-red-500 text-sm mt-1 hidden">Password must be at least 8 characters</p>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-medium mb-2">Confirm Password</label>
+                        <input type="password" id="signupConfirmPassword" placeholder="Confirm your password" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p id="signupConfirmPasswordError" class="text-red-500 text-sm mt-1 hidden">Passwords do not match</p>
+                    </div>
+                    <button onclick="signup()" class="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700 transition duration-200 mb-4">Sign Up</button>
+                    <p class="text-center mt-4 text-gray-600">Already have an account? <a href="#" onclick="toggleAuthForms()" class="text-blue-600 hover:text-blue-800">Login</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Section -->
+        <section id="uploadSection" class="hidden">
+            <div class="max-w-2xl mx-auto">
+                <h3 class="text-2xl font-bold mb-6 text-center">Upload Question Paper</h3>
+                <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center mb-6 transition duration-300 hover:border-blue-500">
+                    <i class="bi bi-cloud-upload text-5xl text-gray-400 mb-6"></i>
+                    <p class="mb-4 text-lg">Drag & drop your files here or</p>
+                    <input type="file" id="fileInput" class="hidden" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg">
+                    <button onclick="document.getElementById('fileInput').click()" class="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200">
+                        Browse Files
+                    </button>
+                    <p class="mt-4 text-sm text-gray-500">Supported formats: PDF, DOC, DOCX, PNG, JPG</p>
+                </div>
+                
+                <div class="bg-blue-50 p-4 rounded-lg flex items-start mb-6">
+                    <i class="bi bi-info-circle text-blue-600 mr-3 mt-1"></i>
+                    <div>
+                        <p class="text-sm text-blue-800">Our AI will analyze your question paper to identify frequently occurring topics, helping you focus on what matters most.</p>
+                    </div>
+                </div>
+                
+                <div id="processingAnimation" class="hidden text-center mt-8">
+                    <div class="loading-spinner w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+                    <p class="mt-6 text-lg">Analyzing your document...</p>
+                    <p class="text-gray-500 mt-2">This may take a moment</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="resultsSection" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold">Analysis Results</h3>
+                <button onclick="showUpload()" class="flex items-center text-blue-600 hover:text-blue-800">
+                    <i class="bi bi-arrow-left mr-2"></i> Upload Another Paper
+                </button>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
+                    <div class="flex items-center mb-4">
+                        <div class="w-8 h-8 flex items-center justify-center bg-red-100 rounded-full mr-3">
+                            <i class="bi bi-star-fill text-red-600"></i>
+                        </div>
+                        <h4 class="text-lg font-semibold">Most Frequent Questions</h4>
+                    </div>
+                    <div id="mostFrequent" class="space-y-3"></div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
+                    <div class="flex items-center mb-4">
+                        <div class="w-8 h-8 flex items-center justify-center bg-blue-100 rounded-full mr-3">
+                            <i class="bi bi-star-half text-blue-600"></i>
+                        </div>
+                        <h4 class="text-lg font-semibold">Medium Frequency Questions</h4>
+                    </div>
+                    <div id="mediumFrequent" class="space-y-3"></div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
+                    <div class="flex items-center mb-4">
+                        <div class="w-8 h-8 flex items-center justify-center bg-yellow-100 rounded-full mr-3">
+                            <i class="bi bi-star text-yellow-600"></i>
+                        </div>
+                        <h4 class="text-lg font-semibold">Less Frequent Questions</h4>
+                    </div>
+                    <div id="lessFrequent" class="space-y-3"></div>
+                </div>
+            </div>
+            
+            <div class="mt-10 bg-white p-6 rounded-lg shadow">
+                <h4 class="text-lg font-semibold mb-4">Recommended Practice</h4>
+                <p class="mb-6 text-gray-600">Based on your question paper analysis, we recommend practicing these DSA topics:</p>
+                <div class="grid md:grid-cols-3 gap-4">
+                    <button onclick="startQuiz(1)" class="p-4 bg-blue-50 rounded-lg flex items-center hover:bg-blue-100 transition duration-200">
+                        <i class="bi bi-diagram-3 text-xl text-blue-600 mr-3"></i>
+                        <span>Binary Search Trees</span>
+                    </button>
+                    <button onclick="startQuiz(7)" class="p-4 bg-blue-50 rounded-lg flex items-center hover:bg-blue-100 transition duration-200">
+                        <i class="bi bi-sort-alpha-down text-xl text-blue-600 mr-3"></i>
+                        <span>Sorting Algorithms</span>
+                    </button>
+                    <button onclick="startQuiz(6)" class="p-4 bg-blue-50 rounded-lg flex items-center hover:bg-blue-100 transition duration-200">
+                        <i class="bi bi-diagram-2 text-xl text-blue-600 mr-3"></i>
+                        <span>Graph Algorithms</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- DSA Dashboard -->
+        <section id="dsaDashboard" class="hidden">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <div>
+                    <h3 class="text-2xl font-bold mb-2">DSA Practice</h3>
+                    <p class="text-gray-600">Select a chapter to start practicing</p>
+                </div>
+                <div class="flex gap-2">
+                    <div class="relative">
+                        <input type="text" placeholder="Search chapters..." class="pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <i class="bi bi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                    <select class="p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Filter by difficulty</option>
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6" id="chaptersContainer">
+                <!-- Chapter cards will be dynamically added here -->
+            </div>
+            
+            <div class="mt-10 bg-white p-6 rounded-lg shadow">
+                <h4 class="text-lg font-semibold mb-4">Your Recent Quizzes</h4>
+                <div id="recentQuizzes" class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Chapter</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="recentQuizzesBody">
+                            <!-- Recent quizzes will be added here -->
+                        </tbody>
+                    </table>
+                </div>
+                <p id="noRecentQuizzes" class="text-center py-4 text-gray-500">No recent quiz attempts found.</p>
+            </div>
+        </section>
+
+        <!-- Quiz Section -->
+        <section id="quizSection" class="hidden max-w-3xl mx-auto">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 id="quizChapterTitle" class="text-2xl font-bold">Chapter Quiz</h3>
+                    <p class="text-gray-600 mt-1" id="quizDescription">Test your knowledge on this topic</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="timer bg-blue-50 text-blue-800 px-4 py-2 rounded-full flex items-center">
+                        <i class="bi bi-clock mr-2"></i>
+                        <span id="quizTimer">10:00</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="mb-6">
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div id="quizProgress" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between mt-2 text-sm text-gray-600">
+                        <span>Question <span id="currentQuestion">1</span> of <span id="totalQuestions">10</span></span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                </div>
+                
+                <div id="questionContainer" class="mb-8">
+                    <!-- Questions will be dynamically added here -->
+                </div>
+                
+                <div class="flex justify-between">
+                    <button id="prevQuestionBtn" onclick="prevQuestion()" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition duration-200 disabled:opacity-50" disabled>
+                        <i class="bi bi-arrow-left mr-2"></i> Previous
+                    </button>
+                    <button id="nextQuestionBtn" onclick="nextQuestion()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200">
+                        Next <i class="bi bi-arrow-right ml-2"></i>
+                    </button>
+                    <button id="submitQuizBtn" onclick="submitQuiz()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200 hidden">
+                        Submit Quiz
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz Results Section -->
+        <section id="quizResults" class="hidden max-w-3xl mx-auto">
+            <div class="bg-white p-8 rounded-lg shadow">
+                <div class="text-center mb-8">
+                    <h3 class="text-2xl font-bold mb-3">Quiz Results</h3>
+                    <div id="scoreCircle" class="w-32 h-32 rounded-full border-8 border-blue-600 mx-auto flex items-center justify-center mb-4">
+                        <span class="text-3xl font-bold text-blue-600"><span id="scoreDisplay">0</span>%</span>
+                    </div>
+                    <p class="text-lg"><span id="resultMessage">Good job!</span></p>
+                    <p class="text-gray-600 mt-2">You answered <span id="correctAnswers">0</span> out of <span id="totalResultQuestions">10</span> questions correctly.</p>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-4 mb-8 text-center">
+                    <div class="p-4 bg-green-50 rounded-lg">
+                        <p class="text-2xl font-bold text-green-600" id="easyScore">0/0</p>
+                        <p class="text-gray-600">Easy</p>
+                    </div>
+                    <div class="p-4 bg-yellow-50 rounded-lg">
+                        <p class="text-2xl font-bold text-yellow-600" id="mediumScore">0/0</p>
+                        <p class="text-gray-600">Medium</p>
+                    </div>
+                    <div class="p-4 bg-red-50 rounded-lg">
+                        <p class="text-2xl font-bold text-red-600" id="hardScore">0/0</p>
+                        <p class="text-gray-600">Hard</p>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center gap-4">
+                    <button onclick="retakeQuiz()" class="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200">
+                        <i class="bi bi-arrow-repeat mr-2"></i> Retake Quiz
+                    </button>
+                    <button onclick="reviewAnswers()" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition duration-200">
+                        <i class="bi bi-eye mr-2"></i> Review Answers
+                    </button>
+                    <button onclick="showDSADashboard()" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition duration-200">
+                        <i class="bi bi-grid mr-2"></i> Back to Dashboard
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile Section -->
+        <section id="profileSection" class="hidden max-w-5xl mx-auto">
+            <h3 class="text-2xl font-bold mb-6">Your Profile</h3>
+            
+            <div class="bg-white p-6 rounded-lg shadow mb-8">
+                <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
+                    <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="bi bi-person text-5xl text-blue-600"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 id="profileName" class="text-xl font-semibold mb-2">John Doe</h4>
+                        <p id="profileEmail" class="text-gray-600 mb-4">john.doe@example.com</p>
+                        <div class="flex flex-wrap gap-3">
+                            <button class="px-4 py-2 text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition duration-200">
+                                <i class="bi bi-pencil mr-2"></i> Edit Profile
+                            </button>
+                            <button class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition duration-200">
+                                <i class="bi bi-lock mr-2"></i> Change Password
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow mb-8">
+                <h4 class="text-lg font-semibold mb-4">Performance Overview</h4>
+                <div class="grid md:grid-cols-4 gap-4 mb-6">
+                    <div class="p-4 bg-blue-50 rounded-lg text-center">
+                        <p class="text-2xl font-bold text-blue-600">23</p>
+                        <p class="text-gray-600">Quizzes Taken</p>
+                    </div>
+                    <div class="p-4 bg-green-50 rounded-lg text-center">
+                        <p class="text-2xl font-bold text-green-600">78%</p>
+                        <p class="text-gray-600">Average Score</p>
+                    </div>
+                    <div class="p-4 bg-purple-50 rounded-lg text-center">
+                        <p class="text-2xl font-bold text-purple-600">5</p>
+                        <p class="text-gray-600">Uploads</p>
+                    </div>
+                    <div class="p-4 bg-yellow-50 rounded-lg text-center">
+                        <p class="text-2xl font-bold text-yellow-600">12</p>
+                        <p class="text-gray-600">Hours Practiced</p>
+                    </div>
+                </div>
+                
+                <h5 class="font-medium mb-3">Strongest Topics</h5>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                    <div class="p-2 bg-green-50 rounded text-center text-green-800">Arrays</div>
+                    <div class="p-2 bg-green-50 rounded text-center text-green-800">Linked Lists</div>
+                    <div class="p-2 bg-green-50 rounded text-center text-green-800">Sorting</div>
+                    <div class="p-2 bg-green-50 rounded text-center text-green-800">Binary Trees</div>
+                </div>
+                
+                <h5 class="font-medium mb-3">Areas for Improvement</h5>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div class="p-2 bg-red-50 rounded text-center text-red-800">Graphs</div>
+                    <div class="p-2 bg-red-50 rounded text-center text-red-800">Dynamic Programming</div>
+                    <div class="p-2 bg-red-50 rounded text-center text-red-800">Advanced Trees</div>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h4 class="text-lg font-semibold mb-4">Quiz History</h4>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Chapter</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time Taken</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="quizHistoryBody">
+                            <!-- History will be added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-white border-t mt-12 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="md:flex md:items-center md:justify-between">
+                <div class="flex justify-center md:order-2 space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-gray-500">
+                        <i class="bi bi-twitter text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-gray-500">
+                        <i class="bi bi-facebook text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-gray-500">
+                        <i class="bi bi-instagram text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-gray-500">
+                        <i class="bi bi-github text-xl"></i>
+                    </a>
+                </div>
+                <div class="mt-8 md:mt-0 md:order-1">
+                    <p class="text-center text-base text-gray-400">
+                        &copy; 2023 QuizPrep Pro. All rights reserved.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mock data
+        const dsaChapters = [
+            { id: 1, name: 'Arrays', icon: 'bi-grid', difficulty: 'easy', questions: 15 },
+            { id: 2, name: 'Linked Lists', icon: 'bi-link', difficulty: 'medium', questions: 12 },
+            { id: 3, name: 'Stacks', icon: 'bi-stack', difficulty: 'easy', questions: 10 },
+            { id: 4, name: 'Queues', icon: 'bi-collection', difficulty: 'medium', questions: 10 },
+            { id: 5, name: 'Trees', icon: 'bi-diagram-3', difficulty: 'hard', questions: 18 },
+            { id: 6, name: 'Graphs', icon: 'bi-diagram-2', difficulty: 'hard', questions: 15 },
+            { id: 7, name: 'Sorting', icon: 'bi-sort-alpha-down', difficulty: 'medium', questions: 12 },
+            { id: 8, name: 'Searching', icon: 'bi-search', difficulty: 'easy', questions: 8 },
+            { id: 9, name: 'Dynamic Programming', icon: 'bi-code-slash', difficulty: 'hard', questions: 20 },
+            { id: 10, name: 'Greedy Algorithms', icon: 'bi-lightning-charge', difficulty: 'medium', questions: 10 },
+            { id: 11, name: 'Hashing', icon: 'bi-hash', difficulty: 'medium', questions: 12 },
+            { id: 12, name: 'Recursion', icon: 'bi-arrow-repeat', difficulty: 'hard', questions: 15 }
+        ];
+
+        const quizHistory = [
+            { date: '2023-09-15', chapter: 'Arrays', score: '85%', time: '8:32', id: 1 },
+            { date: '2023-09-12', chapter: 'Linked Lists', score: '70%', time: '9:45', id: 2 },
+            { date: '2023-09-10', chapter: 'Stacks', score: '90%', time: '7:15', id: 3 },
+            { date: '2023-09-05', chapter: 'Trees', score: '65%', time: '10:00', id: 5 },
+            { date: '2023-09-01', chapter: 'Sorting', score: '75%', time: '8:50', id: 7 }
+        ];
+
+        // Sample questions for quiz
+        const sampleQuestions = [
+            {
+                id: 1,
+                question: "What is the time complexity of insertion operation in a binary search tree?",
+                options: ["O(1)", "O(log n)", "O(n)", "O(n log n)"],
+                correctAnswer: 1,
+                difficulty: "easy",
+                userAnswer: null
+            },
+            {
+                id: 2,
+                question: "Which of the following sorting algorithms has the worst time complexity?",
+                options: ["Quick Sort", "Merge Sort", "Bubble Sort", "Heap Sort"],
+                correctAnswer: 2,
+                difficulty: "medium",
+                userAnswer: null
+            },
+            {
+                id: 3,
+                question: "In a breadth-first search algorithm, which data structure is used?",
+                options: ["Stack", "Queue", "Linked List", "Array"],
+                correctAnswer: 1,
+                difficulty: "medium",
+                userAnswer: null
+            },
+            {
+                id: 4,
+                question: "What is the space complexity of DFS algorithm?",
+                options: ["O(1)", "O(log n)", "O(n)", "O(n²)"],
+                correctAnswer: 2,
+                difficulty: "hard",
+                userAnswer: null
+            },
+            {
+                id: 5,
+                question: "Which of these data structures allows for O(1) insertions and deletions at both ends?",
+                options: ["Array", "Stack", "Queue", "Deque"],
+                correctAnswer: 3,
+                difficulty: "easy",
+                userAnswer: null
+            }
+        ];
+
+        // Global variables
+        let currentUser = null;
+        let currentQuizChapter = null;
+        let currentQuestionIndex = 0;
+        let quizTimer = null;
+        let quizTimeRemaining = 600; // 10 minutes
+
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        darkModeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+            const icon = darkModeToggle.querySelector('i');
+            icon.classList.toggle('bi-moon-stars');
+            icon.classList.toggle('bi-sun');
+        });
+
+        // File Upload Handler
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            if (files.length > 0) {
+                document.getElementById('processingAnimation').classList.remove('hidden');
+                document.querySelector('.loading-spinner').style.display = 'block';
+                
+                // Simulate processing
+                setTimeout(() => {
+                    document.getElementById('processingAnimation').classList.add('hidden');
+                    document.getElementById('uploadSection').classList.add('hidden');
+                    document.getElementById('resultsSection').classList.remove('hidden');
+                    displayResults();
+                }, 2000);
+            }
+        }
+
+        // Navigation Functions
+        function showSection(sectionId) {
+            document.querySelectorAll('main section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+        }
+
+        function showUpload() {
+            showSection('uploadSection');
+        }
+
+        function showProfile() {
+            showSection('profileSection');
+            populateProfileData();
+        }
+
+        function showDSADashboard() {
+            showSection('dsaDashboard');
+            loadDSAChapters();
+            loadRecentQuizzes();
+        }
+
+        // Auth Functions
+        function closeModal() {
+            document.getElementById('authModal').classList.add('hidden');
+        }
+
+        function showLogin() {
+            document.getElementById('authModal').classList.remove('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('signupForm').classList.add('hidden');
+            document.getElementById('modalTitle').textContent = 'Login';
+        }
+
+        function showSignup() {
+            document.getElementById('authModal').classList.remove('hidden');
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('signupForm').classList.remove('hidden');
+            document.getElementById('modalTitle').textContent = 'Sign Up';
+        }
+
+        function toggleAuthForms() {
+            document.getElementById('loginForm').classList.toggle('hidden');
+            document.getElementById('signupForm').classList.toggle('hidden');
+            const modalTitle = document.getElementById('modalTitle');
+            modalTitle.textContent = modalTitle.textContent === 'Login' ? 'Sign Up' : 'Login';
+        }
+
+        function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            let isValid = true;
+            
+            if (!email || !isValidEmail(email)) {
+                document.getElementById('loginEmailError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('loginEmailError').classList.add('hidden');
+            }
+            
+            if (!password) {
+                document.getElementById('loginPasswordError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('loginPasswordError').classList.add('hidden');
+            }
+            
+            if (isValid) {
+                // Simulate successful login
+                currentUser = {
+                    name: 'John Doe',
+                    email: email
+                };
+                updateUserInterface();
+                closeModal();
+            }
+        }
+
+        function signup() {
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('signupConfirmPassword').value;
+            let isValid = true;
+            
+            if (!name) {
+                document.getElementById('signupNameError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('signupNameError').classList.add('hidden');
+            }
+            
+            if (!email || !isValidEmail(email)) {
+                document.getElementById('signupEmailError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('signupEmailError').classList.add('hidden');
+            }
+            
+            if (!password || password.length < 8) {
+                document.getElementById('signupPasswordError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('signupPasswordError').classList.add('hidden');
+            }
+            
+            if (password !== confirmPassword) {
+                document.getElementById('signupConfirmPasswordError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('signupConfirmPasswordError').classList.add('hidden');
+            }
+            
+            if (isValid) {
+                // Simulate successful signup
+                currentUser = {
+                    name: name,
+                    email: email
+                };
+                updateUserInterface();
+                closeModal();
+            }
+        }
+
+        function loginWithGoogle() {
+            // Simulate Google login
+            currentUser = {
+                name: 'John Doe',
+                email: 'john.doe@example.com'
+            };
+            updateUserInterface();
+            closeModal();
+        }
+
+        function logout() {
+            currentUser = null;
+            updateUserInterface();
+            showSection('homeSection');
+        }
+
+        function updateUserInterface() {
+            if (currentUser) {
+                document.getElementById('authButtons').classList.add('hidden');
+                document.getElementById('userSection').classList.remove('hidden');
+                document.getElementById('profileBtn').classList.remove('hidden');
+                document.getElementById('userName').textContent = currentUser.name;
+            } else {
+                document.getElementById('authButtons').classList.remove('hidden');
+                document.getElementById('userSection').classList.add('hidden');
+                document.getElementById('profileBtn').classList.add('hidden');
+            }
+        }
+
+        function isValidEmail(email) {
+            const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(String(email).toLowerCase());
+        }
+
+        // DSA Dashboard Functions
+        function loadDSAChapters() {
+            const container = document.getElementById('chaptersContainer');
+            container.innerHTML = dsaChapters.map(chapter => {
+                const difficultyClass = 
+                    chapter.difficulty === 'easy' ? 'bg-green-100 text-green-800' : 
+                    chapter.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' : 
+                    'bg-red-100 text-red-800';
+                
+                return `
+                <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow transition-shadow">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i class="bi ${chapter.icon} text-2xl text-blue-600"></i>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-medium ${difficultyClass}">
+                            ${chapter.difficulty}
+                        </span>
+                    </div>
+                    <h4 class="text-lg font-semibold mb-2">${chapter.name}</h4>
+                    <p class="text-gray-600 mb-4">${chapter.questions} questions</p>
+                    <button onclick="startQuiz(${chapter.id})" class="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700 transition-colors flex items-center justify-center">
+                        <i class="bi bi-play-fill mr-2"></i> Start Quiz
+                    </button>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function loadRecentQuizzes() {
+            const recentQuizzesBody = document.getElementById('recentQuizzesBody');
+            const noRecentQuizzes = document.getElementById('noRecentQuizzes');
+            
+            if (quizHistory.length > 0) {
+                recentQuizzesBody.innerHTML = quizHistory.slice(0, 3).map(quiz => `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">${quiz.date}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${quiz.chapter}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${quiz.score}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <button onclick="retakeQuiz(${quiz.id})" class="text-blue-600 hover:text-blue-800">
+                                <i class="bi bi-arrow-repeat mr-1"></i> Retake
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+                noRecentQuizzes.style.display = 'none';
+                document.getElementById('recentQuizzes').style.display = 'block';
+            } else {
+                noRecentQuizzes.style.display = 'block';
+                document.getElementById('recentQuizzes').style.display = 'none';
+            }
+        }
+
+        function populateProfileData() {
+            if (currentUser) {
+                document.getElementById('profileName').textContent = currentUser.name;
+                document.getElementById('profileEmail').textContent = currentUser.email;
+            }
+            
+            // Populate quiz history
+            const quizHistoryBody = document.getElementById('quizHistoryBody');
+            quizHistoryBody.innerHTML = quizHistory.map(quiz => `
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">${quiz.date}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${quiz.chapter}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${quiz.score}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${quiz.time}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <button onclick="retakeQuiz(${quiz.id})" class="text-blue-600 hover:text-blue-800 mr-3">
+                            <i class="bi bi-arrow-repeat"></i> Retake
+                        </button>
+                        <button class="text-gray-600 hover:text-gray-800">
+                            <i class="bi bi-eye"></i> View
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Quiz Functions
+        function startQuiz(chapterId) {
+            currentQuizChapter = dsaChapters.find(chapter => chapter.id === chapterId);
+            currentQuestionIndex = 0;
+            
+            // Reset user answers
+            sampleQuestions.forEach(q => q.userAnswer = null);
+            
+            // Update quiz header
+            document.getElementById('quizChapterTitle').textContent = currentQuizChapter.name + ' Quiz';
+            document.getElementById('quizDescription').textContent = `Test your knowledge on ${currentQuizChapter.name}`;
+            
+            // Update progress indicators
+            document.getElementById('currentQuestion').textContent = '1';
+            document.getElementById('totalQuestions').textContent = sampleQuestions.length;
+            document.getElementById('progressPercent').textContent = '0%';
+            document.getElementById('quizProgress').style.width = '0%';
+            
+            // Show first question
+            showQuestion(0);
+            
+            // Set up navigation buttons
+            document.getElementById('prevQuestionBtn').disabled = true;
+            document.getElementById('nextQuestionBtn').classList.remove('hidden');
+            document.getElementById('submitQuizBtn').classList.add('hidden');
+            
+            // Start timer
+            resetQuizTimer();
+            
+            showSection('quizSection');
+        }
+
+        function showQuestion(index) {
+            const question = sampleQuestions[index];
+            const questionContainer = document.getElementById('questionContainer');
+            
+            questionContainer.innerHTML = `
+                <div class="question-card mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-xl font-medium">Question ${index + 1}</h4>
+                        <span class="px-3 py-1 text-xs font-medium rounded-full ${
+                            question.difficulty === 'easy' ? 'bg-green-100 text-green-800' : 
+                            question.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' : 
+                            'bg-red-100 text-red-800'
+                        }">${question.difficulty}</span>
+                    </div>
+                    <p class="text-lg mb-6">${question.question}</p>
+                    <div class="space-y-3">
+                        ${question.options.map((option, optIndex) => `
+                            <div class="option-hover">
+                                <label class="flex items-center p-4 border rounded-lg cursor-pointer ${
+                                    question.userAnswer === optIndex ? 
+                                    'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 
+                                    'border-gray-200 hover:border-gray-300'
+                                }">
+                                    <input type="radio" name="question${question.id}" value="${optIndex}" 
+                                        ${question.userAnswer === optIndex ? 'checked' : ''} 
+                                        onchange="selectAnswer(${index}, ${optIndex})"
+                                        class="mr-3">
+                                    <span>${option}</span>
+                                </label>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            // Update progress
+            updateQuizProgress(index);
+        }
+
+        function selectAnswer(questionIndex, optionIndex) {
+            sampleQuestions[questionIndex].userAnswer = optionIndex;
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < sampleQuestions.length - 1) {
+                currentQuestionIndex++;
+                showQuestion(currentQuestionIndex);
+                document.getElementById('prevQuestionBtn').disabled = false;
+                
+                // Show submit button on last question
+                if (currentQuestionIndex === sampleQuestions.length - 1) {
+                    document.getElementById('nextQuestionBtn').classList.add('hidden');
+                    document.getElementById('submitQuizBtn').classList.remove('hidden');
+                }
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                showQuestion(currentQuestionIndex);
+                
+                // Disable prev button on first question
+                if (currentQuestionIndex === 0) {
+                    document.getElementById('prevQuestionBtn').disabled = true;
+                }
+                
+                // Show next button if coming back from last question
+                if (currentQuestionIndex < sampleQuestions.length - 1) {
+                    document.getElementById('nextQuestionBtn').classList.remove('hidden');
+                    document.getElementById('submitQuizBtn').classList.add('hidden');
+                }
+            }
+        }
+
+        function updateQuizProgress(index) {
+            const progress = ((index + 1) / sampleQuestions.length) * 100;
+            document.getElementById('quizProgress').style.width = `${progress}%`;
+            document.getElementById('currentQuestion').textContent = index + 1;
+            document.getElementById('progressPercent').textContent = `${Math.round(progress)}%`;
+        }
+
+        function resetQuizTimer() {
+            clearInterval(quizTimer);
+            quizTimeRemaining = 600; // 10 minutes
+            updateTimerDisplay();
+            
+            quizTimer = setInterval(() => {
+                quizTimeRemaining--;
+                updateTimerDisplay();
+                
+                if (quizTimeRemaining <= 0) {
+                    clearInterval(quizTimer);
+                    submitQuiz();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(quizTimeRemaining / 60);
+            const seconds = quizTimeRemaining % 60;
+            document.getElementById('quizTimer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Change color when time is running low
+            if (quizTimeRemaining < 60) {
+                document.getElementById('quizTimer').parentElement.classList.remove('bg-blue-50', 'text-blue-800');
+                document.getElementById('quizTimer').parentElement.classList.add('bg-red-50', 'text-red-800');
+            }
+        }
+
+        function submitQuiz() {
+            clearInterval(quizTimer);
+            
+            // Calculate score
+            const totalQuestions = sampleQuestions.length;
+            let correctAnswers = 0;
+            let easyCorrect = 0, easyTotal = 0;
+            let mediumCorrect = 0, mediumTotal = 0;
+            let hardCorrect = 0, hardTotal = 0;
+            
+            sampleQuestions.forEach(q => {
+                if (q.userAnswer === q.correctAnswer) {
+                    correctAnswers++;
+                    if (q.difficulty === 'easy') easyCorrect++;
+                    if (q.difficulty === 'medium') mediumCorrect++;
+                    if (q.difficulty === 'hard') hardCorrect++;
+                }
+                
+                if (q.difficulty === 'easy') easyTotal++;
+                if (q.difficulty === 'medium') mediumTotal++;
+                if (q.difficulty === 'hard') hardTotal++;
+            });
+            
+            const scorePercentage = Math.round((correctAnswers / totalQuestions) * 100);
+            
+            // Update results display
+            document.getElementById('scoreDisplay').textContent = scorePercentage;
+            document.getElementById('correctAnswers').textContent = correctAnswers;
+            document.getElementById('totalResultQuestions').textContent = totalQuestions;
+            document.getElementById('easyScore').textContent = `${easyCorrect}/${easyTotal}`;
+            document.getElementById('mediumScore').textContent = `${mediumCorrect}/${mediumTotal}`;
+            document.getElementById('hardScore').textContent = `${hardCorrect}/${hardTotal}`;
+            
+            // Set result message based on score
+            let resultMessage = '';
+            if (scorePercentage >= 90) resultMessage = 'Excellent!';
+            else if (scorePercentage >= 70) resultMessage = 'Good job!';
+            else if (scorePercentage >= 50) resultMessage = 'Not bad!';
+            else resultMessage = 'Keep practicing!';
+            
+            document.getElementById('resultMessage').textContent = resultMessage;
+            
+            // Set score circle border color based on score
+            const scoreCircle = document.getElementById('scoreCircle');
+            if (scorePercentage >= 90) {
+                scoreCircle.classList.remove('border-blue-600', 'border-yellow-600', 'border-red-600');
+                scoreCircle.classList.add('border-green-600');
+            } else if (scorePercentage >= 70) {
+                scoreCircle.classList.remove('border-green-600', 'border-yellow-600', 'border-red-600');
+                scoreCircle.classList.add('border-blue-600');
+            } else if (scorePercentage >= 50) {
+                scoreCircle.classList.remove('border-green-600', 'border-blue-600', 'border-red-600');
+                scoreCircle.classList.add('border-yellow-600');
+            } else {
+                scoreCircle.classList.remove('border-green-600', 'border-blue-600', 'border-yellow-600');
+                scoreCircle.classList.add('border-red-600');
+            }
+            
+            showSection('quizResults');
+        }
+
+        function retakeQuiz(chapterId) {
+            if (chapterId) {
+                startQuiz(chapterId);
+            } else if (currentQuizChapter) {
+                startQuiz(currentQuizChapter.id);
+            } else {
+                showDSADashboard();
+            }
+        }
+
+        function reviewAnswers() {
+            // Would show a modal with all questions and correct/incorrect answers
+            alert("Review functionality would be implemented here");
+        }
+
+        function displayResults() {
+            const frequencies = {
+                most: ['Binary Search Trees', 'Quick Sort', 'DFS Algorithm'],
+                medium: ['Merge Sort', 'Hash Tables', 'Heap Sort'],
+                less: ['Bubble Sort', 'Linear Search', 'Selection Sort']
+            };
+
+            document.getElementById('mostFrequent').innerHTML = frequencies.most.map(q => 
+                `<div class="p-3 bg-blue-50 rounded flex items-center">
+                    <i class="bi bi-check2-circle text-blue-600 mr-3"></i>
+                    <span>${q}</span>
+                </div>`
+            ).join('');
+            
+            document.getElementById('mediumFrequent').innerHTML = frequencies.medium.map(q => 
+                `<div class="p-3 bg-green-50 rounded flex items-center">
+                    <i class="bi bi-graph-up text-green-600 mr-3"></i>
+                    <span>${q}</span>
+                </div>`
+            ).join('');
+            
+            document.getElementById('lessFrequent').innerHTML = frequencies.less.map(q => 
+                `<div class="p-3 bg-yellow-50 rounded flex items-center">
+                    <i class="bi bi-star text-yellow-600 mr-3"></i>
+                    <span>${q}</span>
+                </div>`
+            ).join('');
+        }
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
